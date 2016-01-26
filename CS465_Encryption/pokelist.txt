@@ -1,0 +1,41 @@
+ This file shall be encrypted, it contains the first 30 Pokemon
+ their national dex number, their name, and types.
+ *****************
+
+ Ndex	 Pokémon	 Type	
+ #001	Bulbasaur	Grass	Poison
+ #002	Ivysaur	Grass	Poison
+ #003	Venusaur	Grass	Poison
+ #004	Charmander	Fire	
+ #005	Charmeleon	Fire	
+ #006	Charizard	Fire	Flying
+ #007	Squirtle	Water	
+ #008	Wartortle	Water	
+ #009	Blastoise	Water	
+ #010	Caterpie	Bug	
+ #011	Metapod	Bug	
+ #012	Butterfree	Bug	Flying
+ #013	Weedle	Bug	Poison
+ #014	Kakuna	Bug	Poison
+ #015	Beedrill	Bug	Poison
+ #016	Pidgey	Normal	Flying
+ #017	Pidgeotto	Normal	Flying
+ #018	Pidgeot	Normal	Flying
+ #019	Rattata	Normal	
+ #020	Raticate	Normal	
+ #021	Spearow	Normal	Flying
+ #022	Fearow	Normal	Flying
+ #023	Ekans	Poison	
+ #024	Arbok	Poison	
+ #025	Pikachu	Electric
+ #025	Pikachu	Electric	
+ #026	Raichu	Electric	
+ #027	Sandshrew	Ground	
+ #028	Sandslash	Ground	
+ #029	Nidoran♀	Poison	
+ #030	Nidorina	Poison	
+ #031	Nidoqueen	Poison	Ground
+ #032	Nidoran♂	Poison	
+ #033	Nidorino	Poison	
+ #034	Nidoking	Poison	Ground
+
