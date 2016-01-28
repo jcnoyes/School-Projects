@@ -1,5 +1,5 @@
 ###############################################################################
-# Joseph Noyes, Jeffery Webb                                                  #
+# Paul Eccleston, Joseph Noyes, Jeffery Webb                                  #
 # CS 465 Homework 1 - Openssl                                                 #
 # Script encrypts a file (pokelist.txt) 10 times to obtain a statistical avg  #
 # time it takes to encrypt the file.  It then decrypts the file 10 times to   #
@@ -13,6 +13,11 @@
 desTotalTime=0
 total3Des=0
 totalAes=0
+
+#arrays to hold the 10 times, used to calculate the standard deviation
+declare -a desArray
+declare -a des3Array
+declare -a aesArray
 
 echo ""
 echo "Using openssl to encrypt files"
@@ -37,9 +42,10 @@ while [ $i -lt 10 ]; do
   #calculate the time it took to encrypt
   endTime=$(date +%s.%N)
   duration=$(echo "$endTime-$startTime" | bc)
+  desArray[$i]=$duration #store in array to calculate SD later
 
   #write to file
-  echo "des encryption time for loop $i is $duration: " >> EncryptionTimes.txt
+  echo "des encryption time for loop $i is: $duration" >> EncryptionTimes.txt
 
   #add up total, increment i
   desTotalTime=$(echo "$desTotalTime+$duration" | bc)
@@ -70,9 +76,10 @@ while [ $i -lt 10 ]; do
   #calculate the time it took
   endTime=$(date +%s.%N)
   duration=$(echo "$endTime-$startTime" | bc)
+  des3Array[$i]=$duration #store in array to calculate SD later
 
   #write to final
-  echo "3des encryption time for loop $i is $duration: " >> EncryptionTimes.txt
+  echo "3des encryption time for loop $i is: $duration" >> EncryptionTimes.txt
 
   #add up total, increment i
   total3Des=$(echo "$total3Des+$duration" | bc)
@@ -103,9 +110,10 @@ while [ $i -lt 10 ]; do
   #calculate the time it took
   endTime=$(date +%s.%N)
   duration=$(echo "$endTime-$startTime" | bc)
+  aesArray[$i]=$duration #store in array to calculate SD later
 
   #write to final
-  echo "aes-128 encryption time for loop $i is $duration: " >> EncryptionTimes.txt
+  echo "aes-128 encryption time for loop $i is: $duration" >> EncryptionTimes.txt
 
   #add up total, increment i
   totalAes=$(echo "$totalAes+$duration" | bc)
@@ -116,18 +124,66 @@ done
 echo ""
 echo "Total time for aes-128 encryption for 10 loops: $totalAes" >> EncryptionTimes.txt
 
+echo "Calculating information for about encryptions performed..."
+echo ""
 ###############################################################################
 #Calculate the averages
 desAvg=$(echo "$desTotalTime/10" | bc -l)
 des3Avg=$(echo "$total3Des/10" | bc -l)
 aesAvg=$(echo "$totalAes/10" | bc -l)
 
-#print averages to file
+##############################################################################
+#Calculate the standard deviations
+desSD=0
+des3SD=0
+aesSD=0
+tempTotal=0
+
+#for loop for des SD calculation
+for i in "${desArray[@]}"
+do
+	sdTemp=$(echo "$i-$desAvg" | bc -l)
+	sdTemp=$(echo "$sdTemp^2" | bc -l)
+	tempTotal=$(echo "$tempTotal + $sdTemp" | bc -l)
+done
+
+desSD=$(echo "$tempTotal/10" | bc -l)
+desSD=$(echo "sqrt ( $desSD )" | bc -l)
+tempTotal=0
+
+for i in "${des3Array[@]}"
+do
+	sdTemp=$(echo "$i-$des3Avg" | bc -l)
+	sdTemp=$(echo "$sdTemp^2" | bc -l)
+	tempTotal=$(echo "$tempTotal + $sdTemp" | bc -l)
+done
+
+des3SD=$(echo "$tempTotal/10" | bc -l)
+des3SD=$(echo "sqrt ( $des3SD )" | bc -l)
+tempTotal=0
+
+#for loop for des SD calculation
+for i in "${aesArray[@]}"
+do
+        sdTemp=$(echo "$i-$aesAvg" | bc -l)
+        sdTemp=$(echo "$sdTemp^2" | bc -l)
+        tempTotal=$(echo "$tempTotal + $sdTemp" | bc -l)
+done
+
+aesSD=$(echo "$tempTotal/10" | bc -l)
+aes3SD=$(echo "sqrt ( $aesSD )" | bc -l)
+tempTotal=0
+
+
+#print averages and standard deviations to file
 echo "" >> EncryptionTimes.txt
 echo "************************************************************" >> EncryptionTimes.txt
 echo "des average time: $desAvg" >> EncryptionTimes.txt
+echo "des standard deviation: $desSD" >> EncryptionTimes.txt
 echo "des3 average time: $des3Avg" >> EncryptionTimes.txt
+echo "des3 standard deviation: $des3SD" >> EncryptionTimes.txt
 echo "aes-128 average time: $aesAvg" >> EncryptionTimes.txt
+echo "aes-128 standard deviation: $aesSD" >> EncryptionTimes.txt
 echo "Encryptions finished, information stored in EncryptionTimes.txt"
 echo ""
 
@@ -135,6 +191,10 @@ echo ""
 desTotalTime=0
 total3Des=0
 totalAes=0
+
+unset desArray
+unset des3Array
+unset aesArray
 
 #begin decryption of files
 echo "Using openssl to decrypt files"
@@ -155,9 +215,10 @@ while [ $i -lt 10 ]; do
   #calculate the time it took to decrypt
   endTime=$(date +%s.%N)
   duration=$(echo "$endTime-$startTime" | bc)
-
+  desArray[$i]=$duration #store in array to calculate SD later
+ 
   #write to file
-  echo "des decryption time for loop $i is $duration: " >> DecryptionTimes.txt
+  echo "des decryption time for loop $i is: $duration" >> DecryptionTimes.txt
 
   #add up total, increment i
   desTotalTime=$(echo "$desTotalTime+$duration" | bc)
@@ -188,16 +249,16 @@ while [ $i -lt 10 ]; do
   #calculate the time it took to decrypt
   endTime=$(date +%s.%N)
   duration=$(echo "$endTime-$startTime" | bc)
+  des3Array[$i]=$duration #store in array to calculate SD later
 
   #write to file
-  echo "des3 decryption time for loop $i is $duration: " >> DecryptionTimes.txt
+  echo "des3 decryption time for loop $i is: $duration" >> DecryptionTimes.txt
 
   #add up total, increment i
   total3Des=$(echo "$total3Des+$duration" | bc)
   i=$((i+1))
 
 done
-
 
 #write total to file, reset i variable
 echo ""
@@ -222,9 +283,10 @@ while [ $i -lt 10 ]; do
   #calculate the time it took to decrypt
   endTime=$(date +%s.%N)
   duration=$(echo "$endTime-$startTime" | bc)
+  aesArray[$i]=$duration #store in array to calculate SD later
 
   #write to file
-  echo "aes-128 decryption time for loop $i is $duration: " >> DecryptionTimes.txt
+  echo "aes-128 decryption time for loop $i is: $duration" >> DecryptionTimes.txt
 
   #add up total, increment i
   totalAes=$(echo "$total3Des+$duration" | bc)
@@ -232,19 +294,70 @@ while [ $i -lt 10 ]; do
 
 done
 
+echo ""
+echo "Calculating information for about decryptions performed..."
+
 ###############################################################################
 #Calculate the averages
 desAvg=$(echo "$desTotalTime/10" | bc -l)
 des3Avg=$(echo "$total3Des/10" | bc -l)
 aesAvg=$(echo "$totalAes/10" | bc -l)
 
+##############################################################################
+#Calculate the standard deviations
+desSD=0
+des3SD=0
+aesSD=0
+tempTotal=0
+
+#for loop for des SD calculation
+for i in "${desArray[@]}"
+do
+	sdTemp=$(echo "$i-$desAvg" | bc -l)
+	sdTemp=$(echo "$sdTemp^2" | bc -l)
+	tempTotal=$(echo "$tempTotal + $sdTemp" | bc -l)
+done
+
+desSD=$(echo "$tempTotal/10" | bc -l)
+desSD=$(echo "sqrt ( $desSD )" | bc -l)
+tempTotal=0
+
+for i in "${des3Array[@]}"
+do
+	sdTemp=$(echo "$i-$des3Avg" | bc -l)
+	sdTemp=$(echo "$sdTemp^2" | bc -l)
+	tempTotal=$(echo "$tempTotal + $sdTemp" | bc -l)
+done
+
+des3SD=$(echo "$tempTotal/10" | bc -l)
+des3SD=$(echo "sqrt ( $des3SD )" | bc -l)
+tempTotal=0
+
+#for loop for des SD calculation
+for i in "${aesArray[@]}"
+do
+        sdTemp=$(echo "$i-$aesAvg" | bc -l)
+        sdTemp=$(echo "$sdTemp^2" | bc -l)
+        tempTotal=$(echo "$tempTotal + $sdTemp" | bc -l)
+done
+
+aesSD=$(echo "$tempTotal/10" | bc -l)
+aes3SD=$(echo "sqrt ( $aesSD )" | bc -l)
+tempTotal=0
+
+
+#print averages and standard deviations to file
+
 #print averages to file
 echo ""
 echo "" >> DecryptionTimes.txt
 echo "************************************************************" >> DecryptionTimes.txt
 echo "des average time: $desAvg" >> DecryptionTimes.txt
+echo "des standard deviation: $desSD" >> DecryptionTimes.txt
 echo "des3 average time: $des3Avg" >> DecryptionTimes.txt
+echo "des3 standard deviation: $des3SD" >> DecryptionTimes.txt
 echo "aes-128 average time: $aesAvg" >> DecryptionTimes.txt
+echo "aes-128 standard deviation: $aesSD" >> DecryptionTimes.txt
 echo "Decryptions finished, information stored in DecryptionTimes.txt"
 echo ""
 
