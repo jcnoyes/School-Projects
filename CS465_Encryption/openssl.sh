@@ -347,8 +347,6 @@ tempTotal=0
 
 
 #print averages and standard deviations to file
-
-#print averages to file
 echo ""
 echo "" >> DecryptionTimes.txt
 echo "************************************************************" >> DecryptionTimes.txt
@@ -360,7 +358,3 @@ echo "aes-128 average time: $aesAvg" >> DecryptionTimes.txt
 echo "aes-128 standard deviation: $aesSD" >> DecryptionTimes.txt
 echo "Decryptions finished, information stored in DecryptionTimes.txt"
 echo ""
-
-#remove files
-#echo "Cleaning up..."
-#rm aes128EncryptOut.txt desEncryptOut.txt des3EncryptOut.txt aes128-Decrypted.txt des3-Decrypted.txt des-Decrypted.txt
