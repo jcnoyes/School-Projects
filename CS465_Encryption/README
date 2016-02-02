@@ -1,0 +1,7 @@
+To run the script openssl.sh, do
+
+bash openssl.sh
+or
+./openssl.sh
+
+Because of the arrays, sh openssl.sh does not work.
