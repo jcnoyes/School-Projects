@@ -152,6 +152,7 @@ echo "Total time for aes-128 encryption for 10 loops: $totalAes" >> EncryptionTi
 
 echo "Calculating information for about encryptions performed..."
 echo ""
+
 ###############################################################################
 #Calculate the averages
 desAvg=$(echo "$desTotalTime/10" | bc -l)
@@ -223,12 +224,14 @@ unset des3Array
 unset aesArray
 
 #begin decryption of files
+echo "**********************************************************************"
 echo "Using openssl to decrypt files"
 echo ""
 echo "Decrypting des encrypted file..."
 i=0
 
 echo "Des decryption times:" > DecryptionTimes.txt
+
 #while loop for des decryption
 while [ $i -lt 10 ]; do
 
@@ -304,7 +307,7 @@ while [ $i -lt 10 ]; do
   startTime=$(date +%s.%N)
 
   #des decryption with openssl
-  openssl aes-128-cbc -d -in aes128EncryptOut.txt -out aes128-Decrypted.txt -pass pass:3ncrypt1onP@ssw0rd
+  openssl aes-128-cbc -d  -in aes128EncryptOut.txt -out aes128-Decrypted.txt -pass pass:3ncrypt1onP@ssw0rd
 
   #calculate the time it took to decrypt
   endTime=$(date +%s.%N)
@@ -387,6 +390,11 @@ echo ""
 
 #*****************************************************************************
 # Brute forcing
+echo "**********************************************************************"
+echo "Starting brute force attempts for each encrypted file..."
+echo ""
+echo "Brute Force Information" > BruteForce.txt
+echo "" >> BruteForce.txt
 i=0
 
 #start time
@@ -394,10 +402,10 @@ startTime=$(date +%s.%N)
 while [ $i -lt 1000 ]; do #$(openssl rand -base64 32)
   tempPassword=hhh123FakePassword
   #des decryption with openssl
-  openssl aes-128-cbc -d -in aes128EncryptOut.txt -out aes128-Decrypted.txt -pass pass:$tempPassword >/dev/null 2>&1
+  openssl aes-128-cbc -d -in aes128EncryptOut.txt -out decrypted.txt -pass pass:$tempPassword >/dev/null 2>&1
 
   if [ $? -eq 0 ]; then
-	diff aes128-Decrypted.txt pokelist.txt >/dev/null 2>&1
+	diff decrypted.txt pokelist.txt >/dev/null 2>&1
 	  if [ $? -eq 0 ]; then
 		echo "Successfully brute forced with password: $tempPassword"
 		exit
@@ -407,6 +415,7 @@ while [ $i -lt 1000 ]; do #$(openssl rand -base64 32)
   #add up total, increment i
   i=$((i+1))
 done
+
 #calculate the time it took to decrypt
 endTime=$(date +%s.%N)
 duration=$(echo "$endTime-$startTime" | bc)
@@ -418,9 +427,17 @@ $(which echo) -n At a rate of $hashes attempts per minute,
 printTime $totalSeconds
 echo " to brute force AES-128-cbc"
 echo ""
+
+#print to file
+$(which echo) -n At a rate of $hashes attempts per minute, >> BruteForce.txt
+printTime $totalSeconds >> BruteForce.txt
+echo " to brute force AES-128-cbc" >> BruteForce.txt
+echo "" >> BruteForce.txt
+
 #*****************************************************************************
 #*****************************************************************************
 # Brute forcing
+
 i=0
 
 #start time
@@ -441,6 +458,7 @@ while [ $i -lt 1000 ]; do #$(openssl rand -base64 32)
   #add up total, increment i
   i=$((i+1))
 done
+
 #calculate the time it took to decrypt
 endTime=$(date +%s.%N)
 duration=$(echo "$endTime-$startTime" | bc)
@@ -452,6 +470,14 @@ $(which echo) -n At a rate of $hashes attempts per minute,
 printTime $totalSeconds
 echo " to brute force des-cbc"
 echo ""
+
+#print to file
+$(which echo) -n At a rate of $hashes attempts per minute, >> BruteForce.txt
+printTime $totalSeconds >> BruteForce.txt
+echo " to brute force des-cbc" >> BruteForce.txt
+echo "" >> BruteForce.txt
+
+
 #*****************************************************************************
 #*****************************************************************************
 # Brute forcing
@@ -475,6 +501,7 @@ while [ $i -lt 1000 ]; do
   #add up total, increment i
   i=$((i+1))
 done
+
 #calculate the time it took to decrypt
 endTime=$(date +%s.%N)
 duration=$(echo "$endTime-$startTime" | bc)
@@ -487,8 +514,22 @@ $(which echo) -n At a rate of $hashes attempts per minute,
 printTime $totalSeconds
 echo " to brute force des-ebe-cbc"
 echo ""
-#*****************************************************************************
 
+#print to file
+$(which echo) -n At a rate of $hashes attempts per minute, >> BruteForce.txt
+printTime $totalSeconds >> BruteForce.txt
+echo " to brute force des-ebe-cbc" >> BruteForce.txt
+echo ""  >> BruteForce.txt
+
+
+#*****************************************************************************
 #remove files
-echo "Cleaning up..."
-#rm aes128EncryptOut.txt desEncryptOut.txt des3EncryptOut.txt aes128-Decrypted.txt des3-Decrypted.txt des-Decrypted.txt
+
+echo "Cleaning up temp file..."
+rm aes128EncryptOut.txt desEncryptOut.txt des3EncryptOut.txt aes128-Decrypted.txt des3-Decrypted.txt des-Decrypted.txt decrypted.txt
+
+echo ""
+echo "Information stored in EncryptionTimes.txt, DecryptionTimes.txt,"
+echo "and BruteForce.txt"
+echo ""
+echo "Script finished running."
