@@ -1,5 +1,5 @@
 ###############################################################################
-# Joseph Noyes, Jeffery Webb                                                  #
+# Joseph Noyes, Jeffery Webb, Paul Eccleston                                  #
 # CS 465 Homework 1 - Openssl                                                 #
 # Script encrypts a file (pokelist.txt) 10 times to obtain a statistical avg  #
 # time it takes to encrypt the file.  It then decrypts the file 10 times to   #
@@ -13,6 +13,33 @@
 desTotalTime=0
 total3Des=0
 totalAes=0
+
+key_bits_des=56
+key_bits_3des=168
+key_bits_aes128=128
+
+seconds_in_a_day=$((60 * 24))
+seconds_in_a_year=$(($seconds_in_a_day * 365))
+seconds_in_a_decade=$((10 * $seconds_in_a_year))
+
+printTime () {
+$(which echo) -n "It would take "
+if [ $(echo $1 | wc -c) -gt $(echo $seconds_in_a_decade | wc -c) ]; then
+    $(which echo) -n `round $(echo $1 / $seconds_in_a_decade | bc -l) 1` decades
+elif [ $1 -gt $seconds_in_a_year ]; then
+    $(which echo) -n `round $(echo $1 / $seconds_in_a_year | bc -l) 1` years 
+elif [ $1 -gt $seconds_in_a_day ]; then
+    $(which echo) -n `round $(echo $1 / $seconds_in_a_day | bc -l) 1` day 
+else
+	$(which echo) -n $1 seconds
+fi
+
+}
+
+round()
+{
+	echo $(printf %.$2f $(echo "scale=$2;(((10^$2)*$1)+0.5)/(10^$2)" | bc))
+};
 
 echo ""
 echo "Using openssl to encrypt files"
@@ -248,6 +275,110 @@ echo "aes-128 average time: $aesAvg" >> DecryptionTimes.txt
 echo "Decryptions finished, information stored in DecryptionTimes.txt"
 echo ""
 
+#*****************************************************************************
+# Brute forcing
+i=0
+
+#start time
+startTime=$(date +%s.%N)
+while [ $i -lt 1000 ]; do #$(openssl rand -base64 32)
+  tempPassword=hhh123FakePassword
+  #des decryption with openssl
+  openssl aes-128-cbc -d -in aes128EncryptOut.txt -out aes128-Decrypted.txt -pass pass:$tempPassword >/dev/null 2>&1
+
+  if [ $? -eq 0 ]; then
+	diff aes128-Decrypted.txt pokelist.txt >/dev/null 2>&1
+	  if [ $? -eq 0 ]; then
+		echo "Successfully brute forced with password: $tempPassword"
+		exit
+	  fi
+  fi
+
+  #add up total, increment i
+  i=$((i+1))
+done
+#calculate the time it took to decrypt
+endTime=$(date +%s.%N)
+duration=$(echo "$endTime-$startTime" | bc)
+totalSeconds=$(echo "(2^$key_bits_aes128) * ($duration/1000)" | bc -l)
+hashes=$(echo "60.0/($duration/1000.0)" | bc -l)
+hashes=$(round $hashes 1)
+totalSeconds=$(round $totalSeconds 1)
+$(which echo) -n At a rate of $hashes attempts per minute, 
+printTime $totalSeconds
+echo " to brute force AES-128-cbc"
+echo ""
+#*****************************************************************************
+#*****************************************************************************
+# Brute forcing
+i=0
+
+#start time
+startTime=$(date +%s.%N)
+while [ $i -lt 1000 ]; do #$(openssl rand -base64 32)
+  tempPassword=hhh123FakePassword
+  #des decryption with openssl
+  openssl des-cbc -d -in desEncryptOut.txt -out decrypted.txt -pass pass:$tempPassword >/dev/null 2>&1
+
+  if [ $? -eq 0 ]; then
+	diff decrypted.txt pokelist.txt >/dev/null 2>&1
+	  if [ $? -eq 0 ]; then
+		echo "Successfully brute forced with password: $tempPassword"
+		exit
+	  fi
+  fi
+
+  #add up total, increment i
+  i=$((i+1))
+done
+#calculate the time it took to decrypt
+endTime=$(date +%s.%N)
+duration=$(echo "$endTime-$startTime" | bc)
+totalSeconds=$(echo "(2^$key_bits_des) * ($duration/1000)" | bc -l)
+hashes=$(echo "60.0/($duration/1000.0)" | bc -l)
+hashes=$(round $hashes 1)
+totalSeconds=$(round $totalSeconds 1)
+$(which echo) -n At a rate of $hashes attempts per minute, 
+printTime $totalSeconds
+echo " to brute force des-cbc"
+echo ""
+#*****************************************************************************
+#*****************************************************************************
+# Brute forcing
+i=0
+
+#start time
+startTime=$(date +%s.%N)
+while [ $i -lt 1000 ]; do
+  tempPassword=hhh123FakePassword
+  #des decryption with openssl
+  openssl des-ebe-cbc -d -in desEncryptOut.txt -out decrypted.txt -pass pass:$tempPassword >/dev/null 2>&1
+
+  if [ $? -eq 0 ]; then
+	diff decrypted.txt pokelist.txt >/dev/null 2>&1
+	  if [ $? -eq 0 ]; then
+		echo "Successfully brute forced with password: $tempPassword"
+		exit
+	  fi
+  fi
+
+  #add up total, increment i
+  i=$((i+1))
+done
+#calculate the time it took to decrypt
+endTime=$(date +%s.%N)
+duration=$(echo "$endTime-$startTime" | bc)
+totalSeconds=$(echo "(2^$key_bits_3des) * ($duration/1000)" | bc -l)
+hashes=$(echo "60.0/($duration/1000.0)" | bc -l)
+hashes=$(round $hashes 1)
+totalSeconds=$(echo $totalSeconds | tr -d '\\ ')
+totalSeconds=$(round $totalSeconds 1)
+$(which echo) -n At a rate of $hashes attempts per minute, 
+printTime $totalSeconds
+echo " to brute force des-ebe-cbc"
+echo ""
+#*****************************************************************************
+
 #remove files
-#echo "Cleaning up..."
+echo "Cleaning up..."
 #rm aes128EncryptOut.txt desEncryptOut.txt des3EncryptOut.txt aes128-Decrypted.txt des3-Decrypted.txt des-Decrypted.txt
