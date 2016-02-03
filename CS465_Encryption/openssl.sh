@@ -115,7 +115,7 @@ done
 
 #write total to file, reset i variable
 echo ""
-echo "Total time for 3des encryption for 10 loops: $Total3Des" >> EncryptionTimes.txt
+echo "Total time for 3des encryption for 10 loops: $total3Des" >> EncryptionTimes.txt
 
 i=0
 
