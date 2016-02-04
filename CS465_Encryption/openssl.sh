@@ -33,13 +33,13 @@ elif [ $1 -gt $seconds_in_a_day ]; then
 else
 	$(which echo) -n $1 seconds
 fi
-
 }
 
 round()
 {
 	echo $(printf %.$2f $(echo "scale=$2;(((10^$2)*$1)+0.5)/(10^$2)" | bc))
-};
+}
+
 #arrays to hold the 10 times, used to calculate the standard deviation
 declare -a desArray
 declare -a des3Array
@@ -97,7 +97,7 @@ while [ $i -lt 10 ]; do
   startTime=$(date +%s.%N)
 
   #encrypt 3des with openssl
-  openssl des-ede-cbc -in pokelist.txt -out des3EncryptOut.txt -pass pass:3ncrypt1onP@ssw0rd
+  openssl des-ede3-cbc -in pokelist.txt -out des3EncryptOut.txt -pass pass:3ncrypt1onP@ssw0rd
 
   #calculate the time it took
   endTime=$(date +%s.%N)
@@ -121,7 +121,6 @@ i=0
 
 echo "" >> EncryptionTimes.txt
 echo "aes-128 Encryption Times:" >> EncryptionTimes.txt
-
 echo "Starting loop for aes-128 encryption..."
 
 #While loop for aes encryption
@@ -144,12 +143,12 @@ while [ $i -lt 10 ]; do
   #add up total, increment i
   totalAes=$(echo "$totalAes+$duration" | bc)
   i=$((i+1))
+
 done
 
 #write total to file, reset i variable
 echo ""
 echo "Total time for aes-128 encryption for 10 loops: $totalAes" >> EncryptionTimes.txt
-
 echo "Calculating information for about encryptions performed..."
 echo ""
 
@@ -273,7 +272,7 @@ while [ $i -lt 10 ]; do
   startTime=$(date +%s.%N)
 
   #des decryption with openssl
-  openssl des-ede-cbc -d -in des3EncryptOut.txt -out des3-Decrypted.txt -pass pass:3ncrypt1onP@ssw0rd
+  openssl des-ede3-cbc -d -in des3EncryptOut.txt -out des3-Decrypted.txt -pass pass:3ncrypt1onP@ssw0rd
 
   #calculate the time it took to decrypt
   endTime=$(date +%s.%N)
@@ -297,7 +296,6 @@ i=0
 
 #get ready for aes-128 Decryption
 echo "aes-128 Decryption Times:" >> DecryptionTimes.txt
-
 echo "Starting loop for aes-128 Decryption..."
 
 #while loop for aes-128 decryption
@@ -488,7 +486,7 @@ startTime=$(date +%s.%N)
 while [ $i -lt 1000 ]; do
   tempPassword=hhh123FakePassword
   #des decryption with openssl
-  openssl des-ebe-cbc -d -in desEncryptOut.txt -out decrypted.txt -pass pass:$tempPassword >/dev/null 2>&1
+  openssl des-ebe3-cbc -d -in desEncryptOut.txt -out decrypted.txt -pass pass:$tempPassword >/dev/null 2>&1
 
   if [ $? -eq 0 ]; then
 	diff decrypted.txt pokelist.txt >/dev/null 2>&1
@@ -512,13 +510,13 @@ totalSeconds=$(echo $totalSeconds | tr -d '\\ ')
 totalSeconds=$(round $totalSeconds 1)
 $(which echo) -n At a rate of $hashes attempts per minute, 
 printTime $totalSeconds
-echo " to brute force des-ebe-cbc"
+echo " to brute force des-ebe3-cbc"
 echo ""
 
 #print to file
 $(which echo) -n At a rate of $hashes attempts per minute, >> BruteForce.txt
 printTime $totalSeconds >> BruteForce.txt
-echo " to brute force des-ebe-cbc" >> BruteForce.txt
+echo " to brute force des-ebe3-cbc" >> BruteForce.txt
 echo ""  >> BruteForce.txt
 
 
